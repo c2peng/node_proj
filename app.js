@@ -3,11 +3,14 @@ const path = require('path');
 const express = require('express');
 
 const adminRoutes = require('./routes/admin');
-
+const db = require('./utils/database');
 const shopRoutes = require('./routes/shop.js');
 const bodyParser = require('body-parser');
 const handle_404 = require('./controllers/404');
 const app = express();
+
+
+
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(bodyParser.urlencoded({

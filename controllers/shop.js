@@ -1,25 +1,31 @@
 const Product = require('../models/product.js');
 const Cart = require('../models/cart.js')
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll((products) => {
+    Product.fetchAll().then(([row, binary]) => {
         res.render('shop/product-list', {
-            prods: products,
+            prods: row,
             pageTitle: 'All Product',
             path: '/products',
 
         });
-    });
+    }).catch(err => {
+        console.log(err);
+    })
+
 
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll((products) => {
+    Product.fetchAll().then(([rows, fieldData]) => {
         res.render('shop/index', {
-            prods: products,
+            prods: rows,
             pageTitle: 'Shop',
             path: '/',
         });
-    });
+    }).catch((err) => {
+
+    })
+
 }
 
 exports.getCarts = (req, res, next) => {
@@ -67,15 +73,15 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
-        console.log(product);
+    Product.findById(prodId).then(([product]) => {
         res.render('shop/product-detail', {
-            product: product,
+            product: product[0],
             pageTitle: product.title,
             path: '/products'
-        })
+        });
+    }).catch(err => {
+        console.log(err)
     });
-
 }
 
 exports.postCartDeleteProduct = (req, res, next) => {
