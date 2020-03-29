@@ -22,8 +22,9 @@
                 </div>
                 <div class="card__actions">
                     <a href="/admin/edit-product/<%= product.id %>?edit=true" class="btn">Edit</a>
-                    <form method="post" action="admin/delete-product">
+                    <form method="post" action="delete-product">
                         <button class="btn">Delete</button>
+                        <input type="hidden" value="<%=product.id%>" name="productId">
                     </form>
                 </div>
             </article>
