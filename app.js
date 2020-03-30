@@ -12,6 +12,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(bodyParser.urlencoded({
@@ -45,6 +47,10 @@ Cart.belongsToMany(Product, {
 Product.belongsToMany(Cart, {
     through: CartItem
 });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, {through: OrderItem});
+
 
 sequelize.sync().then((result) => {
     return User.findByPk(1);
@@ -57,7 +63,7 @@ sequelize.sync().then((result) => {
     }
     return Promise.resolve(user);
 }).then((user) => {
-    user.getCart().then((cart) => {
+    return user.getCart().then((cart) => {
 
         if (!cart) {
             return user.createCart();
