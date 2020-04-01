@@ -2,7 +2,7 @@ const Product = require('../models/product.js');
 
 
 exports.getProducts = (req, res, next) => {
-    Product.findAll().then(products => {
+    Product.fetchAll().then(products => {
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Product',
@@ -14,7 +14,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.findAll().then(products => {
+    Product.fetchAll().then(products => {
         res.render('shop/index', {
             prods: products,
             pageTitle: 'Shop',
@@ -26,9 +26,7 @@ exports.getIndex = (req, res, next) => {
 }
 
 exports.getCarts = (req, res, next) => {
-    req.user.getCart().then((cart) => {
-        return cart.getProducts()
-            .then((products) => {
+    req.user.getCart().then((products) => {
                 res.render('shop/cart', {
                     path: '/cart',
                     pageTitle: 'Your Cart',
@@ -38,47 +36,14 @@ exports.getCarts = (req, res, next) => {
             .catch(err => {
                 console.log(err);
             });
-    }).catch(err => {
-        console.log(err);
-    })
+
 }
 
-exports.postCarts = (req, res, next) => {
+exports.postCarts = async (req, res, next) => {
     const prodId = req.body.productId;
-    let fetchedCart;
-    let newQuantity = 1;
-    req.user.getCart().then((cart) => {
-            fetchedCart = cart;
-            return cart.getProducts({
-                where: {
-                    id: prodId
-                }
-            });
-        }).then((products) => {
-            let product;
-            if (products.length > 0) {
-                product = products[0];
-            }
-            if (product) {
-                const oldQuantity = product.cartItem.quantity;
-                newQuantity = oldQuantity + 1;
-                return Promise.resolve(product);
-            }
-            return Product.findByPk(prodId);
-        })
-        .then((product) => {
-            return fetchedCart.addProduct(product, {
-                through: {
-                    quantity: newQuantity
-                }
-            });
-        })
-        .then(() => {
-            res.redirect('/cart');
-        })
-        .catch((err) => {
-            console.log(err);
-        })
+    const product = await Product.findById(prodId);
+    await req.user.addToCart(product);
+    res.redirect('/cart');
 }
 
 exports.getOrders = (req, res, next) => {
@@ -101,7 +66,7 @@ exports.getCheckout = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
     //May also use Product.findAll({where:{id: prod.id}}). And this returns an array
-    Product.findByPk(prodId).then((product) => {
+    Product.findById(prodId).then((product) => {
         res.render('shop/product-detail', {
             product: product,
             pageTitle: product.title,
