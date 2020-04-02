@@ -2,7 +2,7 @@ const Product = require('../models/product.js');
 
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll().then(products => {
+    Product.find().then(products => {
         res.render('shop/product-list', {
             prods: products,
             pageTitle: 'All Product',
@@ -14,7 +14,7 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll().then(products => {
+    Product.find().then(products => {
         res.render('shop/index', {
             prods: products,
             pageTitle: 'Shop',
@@ -65,7 +65,6 @@ exports.getCheckout = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
-    //May also use Product.findAll({where:{id: prod.id}}). And this returns an array
     Product.findById(prodId).then((product) => {
         res.render('shop/product-detail', {
             product: product,
