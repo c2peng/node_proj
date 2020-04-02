@@ -26,6 +26,42 @@ class User {
             .catch(err => console.log(err));
     }
 
+    async getOrders() {
+        const db = getDb();
+        return db.collection('orders').find({"user._id" : new mongodb.ObjectId(this._id)})
+        .toArray();
+    }
+
+    async addOrder() {
+        const db = getDb();
+        return this.getCart().then(products => {
+                const order = {
+                    items: products,
+                    user: {
+                        _id: new mongodb.ObjectId(this._id),
+                        name: this.name,
+                    }
+                }
+                return db.collection('orders').insertOne(order);
+            })
+            .then(() => {
+                this.cart = {
+                    items: []
+                };
+                return db.collection('users').updateOne({
+                    _id: new mongodb.ObjectId(this._id)
+                }, {
+                    $set: {
+                        cart: {
+                            items: [],
+                        }
+                    }
+                });
+            })
+
+
+    }
+
     addToCart(product) {
         const cartProductIndex = this.cart.items.findIndex(cp => {
             return cp.productId.toString() === product._id.toString();
@@ -59,7 +95,7 @@ class User {
 
     getCart() {
         const db = getDb();
-        const productIds = this.cart.items.map(cp => cp.productId)
+        const productIds = this.cart.items.map(cp => cp.productId);
         return db.collection('products').find({
                 _id: {
                     $in: productIds
@@ -75,6 +111,24 @@ class User {
                     };
                 });
             });
+    }
+
+    deleteItemFromCart(id) {
+        const updatedCartItems = this.cart.items.filter(item => {
+            return item.productId.toString() !== id.toString();
+        });
+        const db = getDb();
+        return db.collection('users').updateOne({
+            _id: new mongodb.ObjectId(this._id),
+        }, {
+            $set: {
+                cart: {
+                    items: updatedCartItems
+                }
+            }
+        });
+
+
     }
 }
 
