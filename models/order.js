@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
     products: [{
-        productData: {
+        product: {
             type: Object,
             required: true
         },
