@@ -4,10 +4,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const csrf = require('csurf');
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 const MONGODBURI = 'mongodb+srv://Cheng:Pc040996@cluster0-ldhqm.mongodb.net/shop?authSource=admin&replicaSet=Cluster0-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true';
+const flash = require('connect-flash');
 
 const app = express();
 
@@ -22,7 +24,7 @@ const store = new MongoDBStore({
     uri: MONGODBURI,
     collection: 'sessions',
 });
-
+const csrfProtection = csrf();
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -34,6 +36,8 @@ app.use(session({
     store: store
 }));
 
+app.use(csrfProtection);
+app.use(flash());
 app.use((req, res , next) => {
     if(!req.session.user){
         return next();
@@ -43,6 +47,11 @@ app.use((req, res , next) => {
         req.user = user;
         next();
     })
+})
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
 })
 
 app.use('/admin', adminRoutes);
