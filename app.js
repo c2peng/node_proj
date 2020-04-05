@@ -56,16 +56,6 @@ mongoose.connect('mongodb+srv://Cheng:Pc040996@cluster0-ldhqm.mongodb.net/shop?a
         useUnifiedTopology: true
     })
     .then(result => {
-        if (User.find().length === 0) {
-            const user = new User({
-                name: 'Cheng',
-                email: 'cluster0@cl',
-                cart: {
-                    items: []
-                }
-            });
-        }
-
         app.listen(3000);
 
     })

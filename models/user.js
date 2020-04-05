@@ -8,6 +8,10 @@ mongoose.set('useUnifiedTopology', true);
 const userSchema = new Schema({
     name: {
         type: String,
+        required: false
+    },
+    password: {
+        type: String,
         required: true
     },
     email: {
